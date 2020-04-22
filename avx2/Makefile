@@ -50,7 +50,8 @@ shared: \
   libpqcrystals_dilithium4aes_avx2.so \
   libpqcrystals_fips202_ref.so \
   libpqcrystals_fips202x4_avx2.so \
-  libpqcrystals_aes256ctr_avx2.so
+  libpqcrystals_aes256ctr_avx2.so \
+  libpqcrystals_dilithium4_avx2.a
 
 keccak4x/KeccakP-1600-times4-SIMD256.o: \
   keccak4x/KeccakP-1600-times4-SIMD256.c \
@@ -82,7 +83,16 @@ libpqcrystals_dilithium3_avx2.so: $(SOURCES) $(HEADERS) symmetric-shake.c
 
 libpqcrystals_dilithium4_avx2.so: $(SOURCES) $(HEADERS) symmetric-shake.c
 	$(CC) -shared -fPIC $(CFLAGS) -DDILITHIUM_MODE=4 \
-	  -o $@ $(SOURCES) symmetric-shake.c
+	  -o $@ $< $(SOURCES) symmetric-shake.c
+
+%.o : %.c
+	$(CC) $(CFLAGS) -DDILITHIUM_MODE=4 -c $< -o $@
+
+%.o : %.S
+	$(CC) $(CFLAGS) -DDILITHIUM_MODE=4 -c $< -o $@
+
+libpqcrystals_dilithium4_avx2.a: sign.o packing.o polyvec.o poly.o ntt.o invntt.o pointwise.o consts.o rejsample.o reduce.o randombytes.o fips202.o fips202x4.o aes256ctr.o keccak4x/KeccakP-1600-times4-SIMD256.o symmetric-shake.o
+	$(AR) -rc $@ $?	
 
 libpqcrystals_dilithium2aes_avx2.so: $(SOURCES) $(HEADERS)
 	$(CC) -shared -fPIC $(CFLAGS) -DDILITHIUM_MODE=2 -DDILITHIUM_USE_AES \
