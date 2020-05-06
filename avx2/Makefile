@@ -94,7 +94,7 @@ libpqcrystals_dilithium4_avx2.so: $(SOURCES) $(HEADERS) symmetric-shake.c
 	  -o $@ $< $(SOURCES) symmetric-shake.c
 
 libpqcrystals_dilithium_common_avx2.a: DILITHIUM_VERSION = 
-libpqcrystals_dilithium_common_avx2.a: randombytes.o fips202.o fips202x4.o aes256ctr.o keccak4x/KeccakP-1600-times4-SIMD256.o symmetric-shake.o
+libpqcrystals_dilithium_common_avx2.a: randombytes.o fips202.o fips202x4.o aes256ctr.o keccak4x/KeccakP-1600-times4-SIMD256.o symmetric-shake.o generic_api.o
 	$(AR) -rc $@ $?
 	rm -f *.o
 
