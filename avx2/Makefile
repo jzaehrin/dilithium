@@ -15,7 +15,7 @@ AES_SOURCES = $(SOURCES) fips202.c aes256ctr.c
 AES_HEADERS = $(HEADERS) fips202.h aes256ctr.h
 
 .PHONY: all shared clean
-.NOTPARALLEL: libpqcrystals_dilithium4_avx2.a libpqcrystals_dilithium3_avx2.a libpqcrystals_dilithium_avx2.a 
+.NOTPARALLEL: libpqcrystals_dilithium4_avx2.a libpqcrystals_dilithium3_avx2.a libpqcrystals_dilithium2_avx2.a libpqcrystals_dilithium1_avx2.a libpqcrystals_dilithium_avx2.a 
 
 all: \
   test/test_dilithium2 \
@@ -53,7 +53,13 @@ shared: \
   libpqcrystals_fips202_ref.so \
   libpqcrystals_fips202x4_avx2.so \
   libpqcrystals_aes256ctr_avx2.so \
-  libpqcrystals_dilithium4_avx2.a
+  libpqcrystals_dilithium_avx2.a
+
+%.o : %.c
+	$(CC) $(CFLAGS) $(DILITHIUM_VERSION) -c $< -o $@
+
+%.o : %.S
+	$(CC) $(CFLAGS) $(DILITHIUM_VERSION) -c $< -o $@
 
 keccak4x/KeccakP-1600-times4-SIMD256.o: \
   keccak4x/KeccakP-1600-times4-SIMD256.c \
@@ -87,12 +93,6 @@ libpqcrystals_dilithium4_avx2.so: $(SOURCES) $(HEADERS) symmetric-shake.c
 	$(CC) -shared -fPIC $(CFLAGS) -DDILITHIUM_MODE=4 \
 	  -o $@ $< $(SOURCES) symmetric-shake.c
 
-%.o : %.c
-	$(CC) $(CFLAGS) $(DILITHIUM_VERSION) -c $< -o $@
-
-%.o : %.S
-	$(CC) $(CFLAGS) $(DILITHIUM_VERSION) -c $< -o $@
-
 libpqcrystals_dilithium_common_avx2.a: DILITHIUM_VERSION = 
 libpqcrystals_dilithium_common_avx2.a: randombytes.o fips202.o fips202x4.o aes256ctr.o keccak4x/KeccakP-1600-times4-SIMD256.o symmetric-shake.o
 	$(AR) -rc $@ $?
@@ -108,10 +108,22 @@ libpqcrystals_dilithium3_avx2.a: sign.o packing.o polyvec.o poly.o ntt.o invntt.
 	$(AR) -rc $@ $?
 	rm -f *.o
 
+libpqcrystals_dilithium2_avx2.a: DILITHIUM_VERSION = -DDILITHIUM_MODE=2
+libpqcrystals_dilithium2_avx2.a: sign.o packing.o polyvec.o poly.o ntt.o invntt.o pointwise.o consts.o rejsample.o reduce.o
+	$(AR) -rc $@ $?
+	rm -f *.o
+
+libpqcrystals_dilithium1_avx2.a: DILITHIUM_VERSION = -DDILITHIUM_MODE=1
+libpqcrystals_dilithium1_avx2.a: sign.o packing.o polyvec.o poly.o ntt.o invntt.o pointwise.o consts.o rejsample.o reduce.o
+	$(AR) -rc $@ $?
+	rm -f *.o
+
 libpqcrystals_dilithium_avx2.a: libpqcrystals_dilithium_common_avx2.a
 	$(MAKE) libpqcrystals_dilithium4_avx2.a
 	$(MAKE) libpqcrystals_dilithium3_avx2.a
-	$(AR) -rcT $@ $? libpqcrystals_dilithium4_avx2.a libpqcrystals_dilithium3_avx2.a
+	$(MAKE) libpqcrystals_dilithium2_avx2.a
+	$(MAKE) libpqcrystals_dilithium1_avx2.a
+	$(AR) -rcT $@ $? libpqcrystals_dilithium4_avx2.a libpqcrystals_dilithium3_avx2.a libpqcrystals_dilithium2_avx2.a libpqcrystals_dilithium1_avx2.a
 
 libpqcrystals_dilithium2aes_avx2.so: $(SOURCES) $(HEADERS)
 	$(CC) -shared -fPIC $(CFLAGS) -DDILITHIUM_MODE=2 -DDILITHIUM_USE_AES \
