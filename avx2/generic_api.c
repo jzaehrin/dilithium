@@ -1,28 +1,50 @@
 #include <stdlib.h>
+#include <stdbool.h>
+
 #include "generic_api.h"
+#include "implicit.h"
 #include "config.h"
 
-DILITHIUM * dilithium_new(int security_level) {
+DILITHIUM *dilithium_new(void) {
     DILITHIUM * dilithium = NULL;
 
     if ((dilithium = malloc(sizeof(DILITHIUM))) == NULL) {
         return NULL; /* Allocation error */
     }
 
-    dilithium->security_level = security_level;
+    return dilithium;
+}
 
-    if ((dilithium->pk = malloc(dilithium_pk_bytes(dilithium))) == NULL ||
-	    (dilithium->sk = malloc(dilithium_sk_bytes(dilithium))) == NULL) {
-        free(dilithium);
-		return NULL;
+int dilithium_prepare(DILITHIUM* d, int type) {
+    if (!dilithium_is_valid_type(type))
+        return 1; /* Type unknown */
+
+    d->type = type;
+
+    if ((d->pk = malloc(dilithium_pk_bytes(d))) == NULL ||
+	    (d->sk = malloc(dilithium_sk_bytes(d))) == NULL) {
+		return 1; /* Allocation error */
 	}
 
-    return dilithium;
+    return 0;
+}
+
+bool dilithium_is_valid_type(int type) {
+    switch (type)
+    {
+        case DILITHIUM1:
+        case DILITHIUM2:
+        case DILITHIUM3:
+        case DILITHIUM4:
+            return true;
+        default: 
+            return false;
+    }
 }
 
 size_t dilithium_sk_bytes(DILITHIUM * d) {
     size_t size = 0;
-    switch (d->security_level)
+    switch (d->type)
     {
         case DILITHIUM1:
             size = 2096; 
@@ -46,7 +68,7 @@ size_t dilithium_sk_bytes(DILITHIUM * d) {
 
 size_t dilithium_pk_bytes(DILITHIUM * d) {
     size_t size = 0;
-    switch (d->security_level)
+    switch (d->type)
     {
         case DILITHIUM1:
             size = 896; 
@@ -69,7 +91,7 @@ size_t dilithium_pk_bytes(DILITHIUM * d) {
 }
 
 int dilithium_generate_key(DILITHIUM* d) {
-    switch (d->security_level)
+    switch (d->type)
     {
         case DILITHIUM1:
             return pqcrystals_dilithium1_avx2_crypto_sign_keypair(d->pk, d->sk);
@@ -88,7 +110,7 @@ int dilithium_generate_key(DILITHIUM* d) {
 }
 
 int dilithium_sign(unsigned char *sm, unsigned long long *smlen, const unsigned char *msg, unsigned long long len, const DILITHIUM* d) {
-    switch (d->security_level)
+    switch (d->type)
     {
         case DILITHIUM1:
             return pqcrystals_dilithium1_avx2_crypto_sign(sm, smlen, msg, len, d->sk);
@@ -106,20 +128,33 @@ int dilithium_sign(unsigned char *sm, unsigned long long *smlen, const unsigned 
     return 1;
 }
 int dilithium_sign_open(unsigned char *m, unsigned long long *mlen, const unsigned char *sm, unsigned long long smlen, const DILITHIUM* d){
-    switch (d->security_level)
+    switch (d->type)
     {
         case DILITHIUM1:
-            return pqcrystals_dilithium1_avx2_crypto_sign_keypair(m, mlen, sm, smlen, d->pk);
+            return pqcrystals_dilithium1_avx2_crypto_sign_open(m, mlen, sm, smlen, d->pk);
 
         case DILITHIUM2:
-            return pqcrystals_dilithium2_avx2_crypto_sign_keypair(m, mlen, sm, smlen, d->pk);
+            return pqcrystals_dilithium2_avx2_crypto_sign_open(m, mlen, sm, smlen, d->pk);
 
         case DILITHIUM3:
-            return pqcrystals_dilithium3_avx2_crypto_sign_keypair(m, mlen, sm, smlen, d->pk);
+            return pqcrystals_dilithium3_avx2_crypto_sign_open(m, mlen, sm, smlen, d->pk);
 
         case DILITHIUM4:
-            return pqcrystals_dilithium4_avx2_crypto_sign_keypair(m, mlen, sm, smlen, d->pk);
+            return pqcrystals_dilithium4_avx2_crypto_sign_open(m, mlen, sm, smlen, d->pk);
     }
 
     return 1;
+}
+
+void dilithium_free(DILITHIUM* d) {
+    if (d == NULL)
+        return;
+
+    if(d->pk != NULL)
+        free(d->pk);
+
+    if(d->sk != NULL)
+        free(d->sk);
+
+    free(d);
 }

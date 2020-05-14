@@ -56,10 +56,10 @@ shared: \
   libpqcrystals_dilithium_avx2.a
 
 %.o : %.c
-	$(CC) $(CFLAGS) $(DILITHIUM_VERSION) -c $< -o $@
+	$(CC) $(CFLAGS) -I. -L. -l:libpqcrystals_dilithium_common_avx2.a $(DILITHIUM_VERSION) -c $< -o $@
 
 %.o : %.S
-	$(CC) $(CFLAGS) $(DILITHIUM_VERSION) -c $< -o $@
+	$(CC) $(CFLAGS) -I. -L. -l:libpqcrystals_dilithium_common_avx2.a $(DILITHIUM_VERSION) -c $< -o $@
 
 keccak4x/KeccakP-1600-times4-SIMD256.o: \
   keccak4x/KeccakP-1600-times4-SIMD256.c \
@@ -94,27 +94,27 @@ libpqcrystals_dilithium4_avx2.so: $(SOURCES) $(HEADERS) symmetric-shake.c
 	  -o $@ $< $(SOURCES) symmetric-shake.c
 
 libpqcrystals_dilithium_common_avx2.a: DILITHIUM_VERSION = 
-libpqcrystals_dilithium_common_avx2.a: randombytes.o fips202.o fips202x4.o aes256ctr.o keccak4x/KeccakP-1600-times4-SIMD256.o symmetric-shake.o
+libpqcrystals_dilithium_common_avx2.a: randombytes.o fips202.o fips202x4.o aes256ctr.o keccak4x/KeccakP-1600-times4-SIMD256.o
 	$(AR) -rc $@ $?
 	rm -f *.o
 
 libpqcrystals_dilithium4_avx2.a: DILITHIUM_VERSION = -DDILITHIUM_MODE=4
-libpqcrystals_dilithium4_avx2.a: sign.o packing.o polyvec.o poly.o ntt.o invntt.o pointwise.o consts.o rejsample.o reduce.o
+libpqcrystals_dilithium4_avx2.a: sign.o packing.o polyvec.o poly.o ntt.o invntt.o pointwise.o consts.o rejsample.o reduce.o symmetric-shake.o
 	$(AR) -rc $@ $?
 	rm -f *.o
 
 libpqcrystals_dilithium3_avx2.a: DILITHIUM_VERSION = -DDILITHIUM_MODE=3
-libpqcrystals_dilithium3_avx2.a: sign.o packing.o polyvec.o poly.o ntt.o invntt.o pointwise.o consts.o rejsample.o reduce.o
+libpqcrystals_dilithium3_avx2.a: sign.o packing.o polyvec.o poly.o ntt.o invntt.o pointwise.o consts.o rejsample.o reduce.o symmetric-shake.o
 	$(AR) -rc $@ $?
 	rm -f *.o
 
 libpqcrystals_dilithium2_avx2.a: DILITHIUM_VERSION = -DDILITHIUM_MODE=2
-libpqcrystals_dilithium2_avx2.a: sign.o packing.o polyvec.o poly.o ntt.o invntt.o pointwise.o consts.o rejsample.o reduce.o
+libpqcrystals_dilithium2_avx2.a: sign.o packing.o polyvec.o poly.o ntt.o invntt.o pointwise.o consts.o rejsample.o reduce.o symmetric-shake.o
 	$(AR) -rc $@ $?
 	rm -f *.o
 
 libpqcrystals_dilithium1_avx2.a: DILITHIUM_VERSION = -DDILITHIUM_MODE=1
-libpqcrystals_dilithium1_avx2.a: sign.o packing.o polyvec.o poly.o ntt.o invntt.o pointwise.o consts.o rejsample.o reduce.o
+libpqcrystals_dilithium1_avx2.a: sign.o packing.o polyvec.o poly.o ntt.o invntt.o pointwise.o consts.o rejsample.o reduce.o symmetric-shake.o
 	$(AR) -rc $@ $?
 	rm -f *.o
 
@@ -124,8 +124,8 @@ libpqcrystals_dilithium_avx2.a: libpqcrystals_dilithium_common_avx2.a
 	$(MAKE) libpqcrystals_dilithium2_avx2.a
 	$(MAKE) libpqcrystals_dilithium1_avx2.a
 
-	$(CC) -c $(CFLAGS) -Wno-implicit-function-declaration -I. -L. -l:libpqcrystals_dilithium1_avx2.a -l:libpqcrystals_dilithium2_avx2.a -l:libpqcrystals_dilithium3_avx2.a -l:libpqcrystals_dilithium4_avx2.a -o libpqcrystals_dilithium_avx2.o generic_api.c
-	$(AR) -rc $@ libpqcrystals_dilithium_avx2.o
+	$(CC) -c $(CFLAGS) -I. -L. -l:libpqcrystals_dilithium1_avx2.a -l:libpqcrystals_dilithium2_avx2.a -l:libpqcrystals_dilithium3_avx2.a -l:libpqcrystals_dilithium4_avx2.a -o libpqcrystals_dilithium_avx2.o generic_api.c
+	$(AR) -rcT $@ libpqcrystals_dilithium_avx2.o libpqcrystals_dilithium_common_avx2.a libpqcrystals_dilithium1_avx2.a libpqcrystals_dilithium2_avx2.a libpqcrystals_dilithium3_avx2.a libpqcrystals_dilithium4_avx2.a
 
 libpqcrystals_dilithium2aes_avx2.so: $(SOURCES) $(HEADERS)
 	$(CC) -shared -fPIC $(CFLAGS) -DDILITHIUM_MODE=2 -DDILITHIUM_USE_AES \
