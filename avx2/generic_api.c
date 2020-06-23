@@ -12,6 +12,10 @@ DILITHIUM *dilithium_new(void) {
         return NULL; /* Allocation error */
     }
 
+    dilithium->pk = NULL;
+    dilithium->sk = NULL;
+    dilithium->type = -1;
+
     return dilithium;
 }
 
