@@ -68,6 +68,7 @@ size_t dilithium_sk_bytes(DILITHIUM * d) {
 
 size_t dilithium_pk_bytes(DILITHIUM * d) {
     size_t size = 0;
+    
     switch (d->type)
     {
         case DILITHIUM1:
@@ -89,6 +90,32 @@ size_t dilithium_pk_bytes(DILITHIUM * d) {
 
     return size;
 }
+
+size_t dilithium_sign_bytes(DILITHIUM * d) {
+    size_t size = 0;
+    
+    switch (d->type)
+    {
+        case DILITHIUM1:
+            size = 1387; 
+            break;
+
+        case DILITHIUM2:
+            size = 2044;
+            break;
+
+        case DILITHIUM3:
+            size = 2701;
+            break;
+
+        case DILITHIUM4:
+            size = 3366;
+            break;
+    }
+
+    return size;
+}
+
 
 int dilithium_generate_key(DILITHIUM* d) {
     switch (d->type)
