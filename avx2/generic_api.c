@@ -95,7 +95,7 @@ size_t dilithium_pk_bytes(DILITHIUM * d) {
     return size;
 }
 
-size_t dilithium_sign_bytes(DILITHIUM * d) {
+size_t dilithium_sign_bytes(DILITHIUM * d, size_t data_len) {
     size_t size = 0;
     
     switch (d->type)
@@ -117,7 +117,7 @@ size_t dilithium_sign_bytes(DILITHIUM * d) {
             break;
     }
 
-    return size;
+    return size + data_len;
 }
 
 

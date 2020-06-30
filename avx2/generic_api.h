@@ -27,6 +27,6 @@ void dilithium_free(DILITHIUM* d);
 bool dilithium_is_valid_type(int type);
 size_t dilithium_sk_bytes(DILITHIUM * d);
 size_t dilithium_pk_bytes(DILITHIUM * d);
-size_t dilithium_sign_bytes(DILITHIUM * d);
+size_t dilithium_sign_bytes(DILITHIUM * d, size_t data_len);
 
 #endif
