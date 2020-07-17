@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/* Dilithium structure */
 struct dilithium {
     int type;
     unsigned char * pk;
@@ -11,7 +12,7 @@ struct dilithium {
 };
 typedef struct dilithium DILITHIUM;
 
-/* Security level */
+/* Dilithium type */
 #define DILITHIUM4 4
 #define DILITHIUM3 3
 #define DILITHIUM2 2

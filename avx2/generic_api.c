@@ -5,6 +5,7 @@
 #include "implicit.h"
 #include "config.h"
 
+/* Allocate Dilithium structure */
 DILITHIUM *dilithium_new(void) {
     DILITHIUM * dilithium = NULL;
 
@@ -19,6 +20,7 @@ DILITHIUM *dilithium_new(void) {
     return dilithium;
 }
 
+/* Prepare key buffers according to dilithium variant type to store them */
 int dilithium_prepare(DILITHIUM* d, int type) {
     if (!dilithium_is_valid_type(type))
         return 1; /* Type unknown */
@@ -33,6 +35,7 @@ int dilithium_prepare(DILITHIUM* d, int type) {
     return 0;
 }
 
+/* Verify if the variant type is a correct type for dilithium */
 bool dilithium_is_valid_type(int type) {
     switch (type)
     {
@@ -46,6 +49,7 @@ bool dilithium_is_valid_type(int type) {
     }
 }
 
+/* Get the secret key size */
 size_t dilithium_sk_bytes(DILITHIUM * d) {
     size_t size = 0;
     switch (d->type)
@@ -70,6 +74,7 @@ size_t dilithium_sk_bytes(DILITHIUM * d) {
     return size;
 }
 
+/* Get the public key size */
 size_t dilithium_pk_bytes(DILITHIUM * d) {
     size_t size = 0;
     
@@ -95,6 +100,7 @@ size_t dilithium_pk_bytes(DILITHIUM * d) {
     return size;
 }
 
+/* Get the signature size according to the size of data need to be sign */
 size_t dilithium_sign_bytes(DILITHIUM * d, size_t data_len) {
     size_t size = 0;
     
@@ -120,7 +126,7 @@ size_t dilithium_sign_bytes(DILITHIUM * d, size_t data_len) {
     return size + data_len;
 }
 
-
+/* Generate a pair of secret and public keys */
 int dilithium_generate_key(DILITHIUM* d) {
     switch (d->type)
     {
@@ -140,6 +146,7 @@ int dilithium_generate_key(DILITHIUM* d) {
     return 1;
 }
 
+/* Sign msg inside sm, the user need to allocate the output buffer */
 int dilithium_sign(unsigned char *sm, unsigned long long *smlen, const unsigned char *msg, unsigned long long len, const DILITHIUM* d) {
     switch (d->type)
     {
@@ -158,6 +165,8 @@ int dilithium_sign(unsigned char *sm, unsigned long long *smlen, const unsigned 
 
     return 1;
 }
+
+/* Verify and open signature inside m, the user need to allocate the output buffer */
 int dilithium_sign_open(unsigned char *m, unsigned long long *mlen, const unsigned char *sm, unsigned long long smlen, const DILITHIUM* d){
     switch (d->type)
     {
@@ -177,6 +186,7 @@ int dilithium_sign_open(unsigned char *m, unsigned long long *mlen, const unsign
     return 1;
 }
 
+/* Free dilithium structure */
 void dilithium_free(DILITHIUM* d) {
     if (d == NULL)
         return;
