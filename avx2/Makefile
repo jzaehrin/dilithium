@@ -1,3 +1,4 @@
+AR = /usr/bin/gcc-ar
 CC = /usr/bin/cc
 MAKE = /usr/bin/make
 CFLAGS += -Wall -Wextra -Wpedantic -Wmissing-prototypes -Wredundant-decls \
