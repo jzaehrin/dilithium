@@ -1,5 +1,5 @@
-#ifndef GENERIC_API_H
-#define GENERIC_API_H
+#ifndef DILITHIUM_GENERIC_API_H
+#define DILITHIUM_GENERIC_API_H
 
 #include <stdint.h>
 #include <stdbool.h>
